@@ -4,10 +4,14 @@ import crypto from 'crypto';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY; 
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+const gumroadSecret = process.env.GUMROAD_WEBHOOK_SECRET; // Get secret from environment
 
 if (!supabaseUrl || !supabaseKey) {
     throw new Error("Supabase URL and Service Key must be provided via environment variables.");
+}
+if (!gumroadSecret) {
+    console.warn("GUMROAD_WEBHOOK_SECRET is not set. Skipping webhook verification. THIS IS INSECURE FOR PRODUCTION.");
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -26,7 +30,52 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
         };
     }
 
-    // TODO: Verify webhook signature here before proceeding
+    // --- Verify webhook signature ---
+    if (gumroadSecret) { // Only verify if secret is configured
+        const signature = event.headers['x-gumroad-signature']; // Gumroad uses this header
+        const rawBody = event.body; // Use the raw body string provided by Netlify
+
+        if (!signature || !rawBody) {
+            console.error("Missing signature or body for verification.");
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: "Missing signature or body" }),
+                headers: { 'Content-Type': 'application/json' }
+            };
+        }
+
+        try {
+            const expectedSignature = crypto
+                .createHmac('sha256', gumroadSecret)
+                .update(rawBody) // Hash the raw body string
+                .digest('hex');
+
+            const isValid = crypto.timingSafeEqual(
+                Buffer.from(signature, 'utf8'),
+                Buffer.from(expectedSignature, 'utf8')
+            );
+
+            if (!isValid) {
+                console.warn("Invalid webhook signature received.");
+                return {
+                    statusCode: 403, // Use 403 Forbidden for invalid signatures
+                    body: JSON.stringify({ error: "Invalid signature" }),
+                    headers: { 'Content-Type': 'application/json' }
+                };
+            }
+             console.log("Webhook signature verified successfully.");
+        } catch (verificationError) {
+            console.error("Error during signature verification:", verificationError);
+             return {
+                statusCode: 500,
+                body: JSON.stringify({ error: "Signature verification failed" }),
+                headers: { 'Content-Type': 'application/json' }
+            };
+        }
+    } else {
+         console.warn("Skipping webhook verification because GUMROAD_WEBHOOK_SECRET is not set.");
+    }
+    // --- End verification ---
 
     try {
         // Gumroad sends data as form-urlencoded, need to parse
