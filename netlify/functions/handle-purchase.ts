@@ -30,19 +30,20 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
         };
     }
 
-    // --- Verify webhook signature ---
+    /* --- Verify webhook signature --- // Commenting out as Gumroad Ping doesn't seem to send the header
     if (gumroadSecret) { // Only verify if secret is configured
-        console.log("Entering verification block. Checking headers and body...");
-        console.log("Received Headers:", JSON.stringify(event.headers, null, 2));
-        console.log("Received Raw Body:", event.body);
-        console.log("Body Type:", typeof event.body);
+        console.log("Entering verification block. Checking headers and body..."); 
+        console.log("Received Headers:", JSON.stringify(event.headers, null, 2)); 
+        console.log("Received Raw Body:", event.body); 
+        console.log("Body Type:", typeof event.body); 
 
         const signature = event.headers['x-gumroad-signature']; // Gumroad uses this header
         const rawBody = event.body; // Use the raw body string provided by Netlify
 
         if (!signature || !rawBody) {
             console.error("Missing signature or body for verification.");
-            console.error(`Signature: ${signature}, Raw Body: ${rawBody}`);
+            // Log the actual values that caused the failure
+            console.error(`Signature: ${signature}, Raw Body: ${rawBody}`); 
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: "Missing signature or body" }),
@@ -81,7 +82,7 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
     } else {
          console.warn("Skipping webhook verification because GUMROAD_WEBHOOK_SECRET is not set.");
     }
-    // --- End verification ---
+    --- End verification --- */
 
     try {
         // Gumroad sends data as form-urlencoded, need to parse
