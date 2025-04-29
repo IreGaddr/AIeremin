@@ -32,11 +32,17 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
 
     // --- Verify webhook signature ---
     if (gumroadSecret) { // Only verify if secret is configured
+        console.log("Entering verification block. Checking headers and body...");
+        console.log("Received Headers:", JSON.stringify(event.headers, null, 2));
+        console.log("Received Raw Body:", event.body);
+        console.log("Body Type:", typeof event.body);
+
         const signature = event.headers['x-gumroad-signature']; // Gumroad uses this header
         const rawBody = event.body; // Use the raw body string provided by Netlify
 
         if (!signature || !rawBody) {
             console.error("Missing signature or body for verification.");
+            console.error(`Signature: ${signature}, Raw Body: ${rawBody}`);
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: "Missing signature or body" }),
