@@ -1,0 +1,33 @@
+{
+  "name": "aieremin",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "public/dist/bundle.js",
+  "scripts": {
+    "clean": "rimraf public",
+    "build": "esbuild script.ts --bundle --outfile=public/dist/bundle.js --format=esm --platform=browser --sourcemap --target=es2020 --minify",
+    "copy-static": "mkdir -p public && cp index.html style.css public/",
+    "build:prod": "npm run clean && npm run build && npm run copy-static",
+    "build:dev:server": "tsc server.ts --outDir dist --target es2020 --module nodenext --moduleResolution nodenext --esModuleInterop",
+    "start:dev:server": "node dist/server.js",
+    "dev": "npm run build:dev:server && npm run start:dev:server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@netlify/functions": "^3.1.2",
+    "@types/node": "^22.15.3",
+    "esbuild": "^0.25.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
+    "@supabase/supabase-js": "^2.49.4",
+    "faunadb": "^4.8.2",
+    "tone": "^15.1.22"
+  }
+}

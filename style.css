@@ -1,0 +1,108 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* Prevent scrollbars */
+    font-family: sans-serif;
+    background-color: #1a1a1a; /* Dark background */
+    color: #f0f0f0;
+}
+
+.app-container {
+    position: relative; /* Needed for positioning overlays */
+    width: 100%;
+    height: 100%;
+    display: flex; /* Center video/canvas */
+    justify-content: center;
+    align-items: center;
+}
+
+.video-canvas-container { 
+    position: relative; /* For canvas overlay */
+    width: 95vw; /* Max width */
+    max-width: 80vh; /* Max width based on height for aspect ratio */
+    aspect-ratio: 640 / 480; /* Maintain 4:3 aspect ratio */
+    border: 1px solid #444;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+#webcamVideo {
+    display: block; 
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    transform: scaleX(-1); 
+    border-radius: 4px; /* Slightly rounded corners */
+}
+
+#outputCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.controls-overlay {
+    position: absolute;
+    bottom: 20px; /* Position at bottom */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
+}
+
+#toggleButton {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: rgba(0, 150, 150, 0.8);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s ease;
+}
+
+#toggleButton:hover {
+    background-color: rgba(0, 180, 180, 0.9);
+}
+
+#toggleButton[textContent="Stop"] {
+    background-color: rgba(200, 0, 0, 0.8);
+}
+#toggleButton[textContent="Stop"]:hover {
+    background-color: rgba(230, 0, 0, 0.9);
+}
+
+#status {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-shadow: 1px 1px 2px black;
+}
+
+/* Simple responsive adjustments */
+@media (max-width: 600px) {
+    .video-canvas-container {
+        width: 100%;
+        max-width: none;
+        height: 80%; /* Take more height */
+        aspect-ratio: unset; /* Allow distortion if needed */
+        border: none;
+    }
+    .controls-overlay {
+        bottom: 15px;
+    }
+    #toggleButton {
+        padding: 12px 25px;
+        font-size: 1.1em;
+    }
+} 

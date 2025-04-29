@@ -1,0 +1,21 @@
+# netlify.toml
+
+[build]
+  command = "npm run build:prod" # Command to build the frontend
+  publish = "public"             # Directory containing the built site
+  functions = "netlify/functions" # Directory for serverless functions
+
+[build.environment] # Optional: Specify Node.js version if needed
+  # NODE_VERSION = "18" 
+
+[functions]
+  # Ensure Node.js functions use ESM
+  node_bundler = "esbuild"
+  # External node modules needed by functions will be bundled
+  # external_node_modules = ["@supabase/supabase-js"] # Typically auto-detected
+
+# Optional: Redirects/Rewrites if needed (e.g., for SPA routing, not essential here)
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200 
