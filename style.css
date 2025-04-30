@@ -170,4 +170,28 @@ html, body {
     width: 100%;
     height: 100%;
     /* display: none; */ /* Initially hidden via inline style */
+}
+
+/* Styles for YouTube Embed */
+.video-demo-container {
+    margin-top: 3em; /* Space above the video section */
+    width: 100%;
+    max-width: 350px; /* Limit width for better appearance */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.video-demo-container h3 {
+    font-size: 1.3em;
+    color: #ccc;
+    margin-bottom: 1em;
+}
+
+.video-demo-container iframe {
+    display: block; /* Remove extra space below iframe */
+    width: 100%; /* Make iframe responsive */
+    aspect-ratio: 9 / 16; /* Correct aspect ratio for YouTube Shorts */
+    height: auto; /* Height adjusts based on aspect ratio */
+    border-radius: 8px; /* Match button style */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 } 
