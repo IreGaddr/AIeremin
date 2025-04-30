@@ -1,18 +1,28 @@
 import { Handler, HandlerEvent, HandlerContext } from "@netlify/functions"; // Using official Netlify types now
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { Resend } from 'resend'; // Import Resend
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-const gumroadSecret = process.env.GUMROAD_WEBHOOK_SECRET; // Get secret from environment
+// const gumroadSecret = process.env.GUMROAD_WEBHOOK_SECRET; // Keep commented out
+
+// Initialize Resend client
+const resendApiKey = process.env.RESEND_API_KEY;
+let resend: Resend | null = null;
+if (resendApiKey) {
+    resend = new Resend(resendApiKey);
+    console.log("Resend client initialized.");
+} else {
+    console.warn("RESEND_API_KEY is not set. Email notifications will be disabled.");
+}
 
 if (!supabaseUrl || !supabaseKey) {
     throw new Error("Supabase URL and Service Key must be provided via environment variables.");
 }
-if (!gumroadSecret) {
-    console.warn("GUMROAD_WEBHOOK_SECRET is not set. Skipping webhook verification. THIS IS INSECURE FOR PRODUCTION.");
-}
+// if (!gumroadSecret) { ... } // Keep commented out
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // TODO: Implement Gumroad Webhook Verification for security
@@ -122,26 +132,62 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
         const token = crypto.randomBytes(16).toString('hex');
 
         // Store the token in Supabase
-        const { data, error } = await supabase
-            .from('access_tokens') // Your table name
+        const { data: insertData, error: insertError } = await supabase
+            .from('access_tokens') 
             .insert({ 
                 token: token, 
-                email: email, // Optional: store email for reference
-                purchase_id: saleId, // Optional: store sale ID
-                status: 'active' // Optional: set initial status
+                email: email, 
+                purchase_id: saleId, 
+                status: 'active' 
             })
-            .select(); // Optionally select the inserted data if needed
+            .select(); 
 
-        if (error) {
-            console.error("Supabase insert error:", error);
-            throw new Error(`Failed to store token: ${error.message}`);
+        if (insertError) {
+            console.error("Supabase insert error:", insertError);
+            throw new Error(`Failed to store token: ${insertError.message}`);
         }
 
         console.log("Successfully generated and stored token:", token, "for email:", email);
 
-        // TODO: Trigger an email to the customer with the unique access link:
-        // `https://<your-app-url>/?token=${token}`
-        // (Requires integrating an email service like SendGrid, Resend, etc.)
+        // --- Send Email with Access Link using Resend ---
+        if (resend && email) {
+            const accessLink = `https://aieremin.com/?token=${token}`; // Use your actual domain
+            const emailSubject = "Your Access Link for AIeremin";
+            const emailHtmlBody = `
+                <p>Thank you for your purchase!</p>
+                <p>You can access AIeremin using the following unique link:</p>
+                <p><a href="${accessLink}">${accessLink}</a></p>
+                <p>Please keep this link secure.</p>
+            `;
+            // You'll need a verified sending domain in Resend (e.g., mail.aieremin.com)
+            // For testing, Resend often allows sending from `onboarding@resend.dev` initially.
+            // Replace 'onboarding@resend.dev' with your verified sending email address.
+            const fromEmail = 'onboarding@resend.dev'; 
+
+            try {
+                const { data: emailData, error: emailError } = await resend.emails.send({
+                    from: fromEmail, 
+                    to: email, 
+                    subject: emailSubject,
+                    html: emailHtmlBody,
+                });
+
+                if (emailError) {
+                    // Log error but don't fail the whole function
+                    console.error("Resend email sending error:", emailError);
+                } else {
+                    console.log("Access email sent successfully to:", email, " Email ID:", emailData?.id);
+                }
+            } catch (emailCatchError) {
+                 // Catch any unexpected errors during email sending
+                 console.error("Caught exception during email sending:", emailCatchError);
+            }
+        } else if (!resend) {
+             console.warn("Skipping email notification because Resend client is not initialized.");
+        } else {
+            console.warn("Skipping email notification because customer email is missing in payload.");
+        }
+        // --- End Email Sending ---
 
         // Return success to Gumroad
         return {
