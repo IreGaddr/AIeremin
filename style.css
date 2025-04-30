@@ -112,7 +112,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    /* justify-content: center; */ /* REMOVED - Let content flow naturally */
     min-height: 100vh; /* Full viewport height */
     text-align: center;
     padding: 20px;
@@ -158,8 +158,11 @@ html, body {
 }
 
 .splash-footer {
-    position: absolute;
-    bottom: 10px;
+    /* position: absolute; */ /* REMOVED - Let it be part of flow */
+    /* bottom: 10px; */
+    margin-top: auto; /* Push footer towards bottom if space allows */
+    padding-top: 2em; /* Add some space above footer */
+    padding-bottom: 1em; /* Add some space below footer */
     width: 100%;
     font-size: 0.8em;
     color: #777;
