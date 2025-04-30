@@ -105,4 +105,69 @@ html, body {
         padding: 12px 25px;
         font-size: 1.1em;
     }
+}
+
+/* Splash Page Styles */
+#splash-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh; /* Full viewport height */
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box; /* Include padding in height/width */
+}
+
+.splash-header h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
+    color: #00e0e0; /* Cyan accent */
+}
+
+.splash-header p {
+    font-size: 1.1em;
+    margin-bottom: 2em;
+    color: #ccc;
+}
+
+.splash-main .purchase-button {
+    display: inline-block;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #009696; /* Darker cyan */
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.splash-main .purchase-button:hover {
+    background-color: #00b0b0; /* Lighter cyan on hover */
+    transform: translateY(-2px); /* Subtle lift effect */
+}
+
+.splash-main .small-text {
+    font-size: 0.9em;
+    color: #aaa;
+    margin-top: 1em;
+}
+
+.splash-footer {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    font-size: 0.8em;
+    color: #777;
+}
+
+/* App Content Styles (Initial state is handled inline: display: none;) */
+#app-content {
+    width: 100%;
+    height: 100%;
+    /* display: none; */ /* Initially hidden via inline style */
 } 

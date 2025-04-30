@@ -3,22 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIeremin MVP</title>
+    <title>AIeremin - Play the Theremin with AI!</title>
     <link rel="stylesheet" href="style.css">
 
     <!-- Import Map Removed -->
 
 </head>
 <body>
-    <div class="app-container">
-        <div class="video-canvas-container">
-            <video id="webcamVideo" autoplay playsinline></video>
-        <canvas id="outputCanvas"></canvas>
-        </div>
-        
-        <div class="controls-overlay">
-             <div id="status">Ready. Click Start!</div>
-             <button id="toggleButton">Start</button>
+
+    <!-- Splash Page Section (Visible when no valid token) -->
+    <div id="splash-page">
+        <header class="splash-header">
+            <h1>Welcome to AIeremin</h1>
+            <p>Experience the future of music - play the theremin using just your hands and AI!</p>
+        </header>
+        <main class="splash-main">
+            <a href="https://iregistered.gumroad.com/l/didhrm" target="_blank" class="purchase-button">Get Access Now - $2</a>
+            <p class="small-text">A unique access link will be emailed to you after purchase.</p>
+        </main>
+        <footer class="splash-footer">
+            <p>&copy; 2025 Ire Gaddr</p>
+        </footer>
+    </div>
+
+    <!-- Main Application Content (Hidden until token is validated) -->
+    <div id="app-content" style="display: none;">
+        <div class="app-container">
+            <div class="video-canvas-container">
+                <video id="webcamVideo" autoplay playsinline></video>
+                <canvas id="outputCanvas"></canvas>
+            </div>
+            
+            <div class="controls-overlay">
+                 <div id="status">Loading...</div>
+                 <button id="toggleButton">Start</button>
+            </div>
         </div>
     </div>
 

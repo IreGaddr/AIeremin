@@ -52,27 +52,33 @@ const videoElement = document.getElementById('webcamVideo') as HTMLVideoElement 
 const canvasElement = document.getElementById('outputCanvas') as HTMLCanvasElement | null;
 const toggleButton = document.getElementById('toggleButton') as HTMLButtonElement | null;
 const statusElement = document.getElementById('status') as HTMLDivElement | null;
+const splashPageDiv = document.getElementById('splash-page') as HTMLDivElement | null;
+const appContentDiv = document.getElementById('app-content') as HTMLDivElement | null;
 
 // --- App Initialization & Token Validation (NEW) ---
 async function initializeAndValidate() {
-    if (!toggleButton || !statusElement) {
-        // Should not happen based on earlier checks, but belt-and-suspenders
-        console.error("Core UI elements missing!");
+    if (!toggleButton || !statusElement || !splashPageDiv || !appContentDiv) {
+        console.error("Core UI elements (button, status, splash, app container) missing!");
+        if(document.body) document.body.innerHTML = "Error: Application failed to load core components."; 
         return; 
     }
 
-    statusElement!.textContent = "Verifying access...";
-    toggleButton!.disabled = true;
-    toggleButton!.style.display = 'none';
+    splashPageDiv.style.display = 'flex';
+    appContentDiv.style.display = 'none';
+    statusElement.textContent = "Verifying access...";
+    toggleButton.disabled = true;
+    toggleButton.style.display = 'none';
 
     // 1. Get token from URL
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
 
     if (!token) {
-        statusElement!.textContent = "Access Denied: Token missing from URL.";
+        statusElement.textContent = "Welcome! Purchase required for access.";
         console.error("Access token required in URL (?token=...).");
-        return; // Stop execution
+        splashPageDiv.style.display = 'flex';
+        appContentDiv.style.display = 'none';
+        return;
     }
 
     // 3. Fetch validation status from serverless function
@@ -89,26 +95,33 @@ async function initializeAndValidate() {
         // 5. Check result and proceed or block
         if (validationResult?.valid === true) {
             console.log("Token validated successfully.");
-            statusElement!.textContent = "Access granted. Ready.";
-            toggleButton!.style.display = 'block';
-            toggleButton!.disabled = false;
-            toggleButton!.textContent = 'Start';
-            toggleButton!.addEventListener('click', toggleApp);
+            splashPageDiv.style.display = 'none'; 
+            appContentDiv.style.display = 'block'; 
+
+            statusElement.textContent = "Access granted. Ready.";
+            toggleButton.style.display = 'block';
+            toggleButton.disabled = false;
+            toggleButton.textContent = 'Start';
+            toggleButton.addEventListener('click', toggleApp);
         } else {
             const reason = validationResult?.reason || "Invalid token.";
             console.error(`Token validation failed: ${reason}`);
-            statusElement!.textContent = `Access Denied: ${reason}`;
+            statusElement.textContent = `Access Denied: ${reason}`;
+            splashPageDiv.style.display = 'flex';
+            appContentDiv.style.display = 'none';
             // Keep button hidden/disabled
         }
     } catch (error) {
         console.error("Error during token validation fetch:", error);
-        statusElement!.textContent = `Error validating access: ${error instanceof Error ? error.message : 'Network issue'}`;
+        statusElement.textContent = `Error validating access: ${error instanceof Error ? error.message : 'Network issue'}`;
+        splashPageDiv.style.display = 'flex';
+        appContentDiv.style.display = 'none';
         // Keep button hidden/disabled
     }
 }
 
-// Check if elements exist before proceeding (Keep this check)
-if (!videoElement || !canvasElement || !toggleButton || !statusElement) { 
+// Check if elements exist before proceeding
+if (!videoElement || !canvasElement || !toggleButton || !statusElement || !splashPageDiv || !appContentDiv) { 
     throw new Error("Required DOM elements not found!");
 }
 
@@ -463,23 +476,23 @@ function predictWebcam(): void {
 async function initializeApp(): Promise<void> {
     if (isInitialized) return;
     
-    statusElement!.textContent = 'Initializing... Please wait.';
-    toggleButton!.disabled = true;
+    statusElement.textContent = 'Initializing... Please wait.';
+    toggleButton.disabled = true;
     
     try {
         // Run setups
         await setupToneJS(); 
-        statusElement!.textContent = 'Audio ready. Setting up camera...';
+        statusElement.textContent = 'Audio ready. Setting up camera...';
         await setupCamera();
-        statusElement!.textContent = 'Camera ready. Loading model...';
+        statusElement.textContent = 'Camera ready. Loading model...';
         await loadHandLandmarker();
-        statusElement!.textContent = 'Initialization complete. Ready to start.';
+        statusElement.textContent = 'Initialization complete. Ready to start.';
         isInitialized = true; // Mark initialization as complete
-        toggleButton!.disabled = false;
+        toggleButton.disabled = false;
 
     } catch (error) {
         console.error("Initialization failed:", error);
-        statusElement!.textContent = `Initialization Error: ${error instanceof Error ? error.message : String(error)}`;
+        statusElement.textContent = `Initialization Error: ${error instanceof Error ? error.message : String(error)}`;
         // Keep button disabled if init fails
     }
 }
@@ -498,9 +511,9 @@ async function toggleApp(): Promise<void> {
 
     if (isRunning) {
         console.log("Starting detection loop...");
-        statusElement!.textContent = 'Detection running...';
-        toggleButton!.textContent = 'Stop';
-        toggleButton!.style.backgroundColor = '#ff4d4d';
+        statusElement.textContent = 'Detection running...';
+        toggleButton.textContent = 'Stop';
+        toggleButton.style.backgroundColor = '#ff4d4d';
 
         // Reset states before starting loop
         lastVideoTime = -1; 
@@ -519,10 +532,10 @@ async function toggleApp(): Promise<void> {
                 console.log("AudioContext resumed successfully.");
             } catch (err) {
                 console.error("Error resuming AudioContext:", err);
-                statusElement!.textContent = `Audio Error: ${err instanceof Error ? err.message : String(err)}. Try refreshing.`;
+                statusElement.textContent = `Audio Error: ${err instanceof Error ? err.message : String(err)}. Try refreshing.`;
                 isRunning = false; // Prevent loop start
-                toggleButton!.textContent = 'Start';
-                toggleButton!.style.backgroundColor = ''; 
+                toggleButton.textContent = 'Start';
+                toggleButton.style.backgroundColor = ''; 
                 return;
             }
         }
@@ -531,9 +544,9 @@ async function toggleApp(): Promise<void> {
 
     } else {
         console.log("Stopping detection loop...");
-        statusElement!.textContent = 'Stopped. Click Start to resume.';
-        toggleButton!.textContent = 'Start';
-        toggleButton!.style.backgroundColor = ''; 
+        statusElement.textContent = 'Stopped. Click Start to resume.';
+        toggleButton.textContent = 'Start';
+        toggleButton.style.backgroundColor = ''; 
         
         console.log(`Releasing ${activeSynths.size} active synths.`);
         for (const [landmarkId, synthState] of activeSynths.entries()) {
